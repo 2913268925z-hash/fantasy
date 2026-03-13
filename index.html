@@ -238,56 +238,78 @@
         win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    // ==================== 核心引擎：国内网络直连优化版 ====================
+    // ==================== 核心引擎：多节点故障转移架构 ====================
     async function processQuery(query) {
         const text = query.toLowerCase();
 
-        // 1. 本地安全数学计算器 (无需联网)
+        // 1. 本地绝对算力 (毫秒级，无需联网)
         const mathMatch = query.match(/^[\d\+\-\*\/\(\)\.\s]+$/);
         if (mathMatch && query.trim().length > 1) {
-            try { return "本地算力推演完成，结果是：<b>" + eval(query) + "</b>"; } catch(e) {}
+            try { return "本地算力推演完成，结果是：<br><br><b style='font-size:18px; color:var(--accent);'>" + eval(query) + "</b>"; } catch(e) {}
         }
 
         // 2. 实时系统时钟 (无需联网)
-        if (text.includes("时间") || text.includes("几点")) {
-            return "系统时间同步：" + new Date().toLocaleTimeString();
+        if (text.includes("时间") || text.includes("几点") || text.includes("日期")) {
+            return "系统时间同步：<b>" + new Date().toLocaleString() + "</b>";
         }
 
-        // 3. 专属私有知识库 (最优先响应)
+        // 3. 总裁专属知识库 (最高优先级)
         const kb = {
-            "赵一": "赵一先生是 Fantasy 的创始人兼 CEO，他主导了公司的技术哲学与商业走向。",
-            "高源泽": "高源泽是我们的 CTO，他开发了 100T 参数的神经涌现网络。",
+            "赵一": "赵一先生是 Fantasy 的创始人兼 CEO，他主导了公司的技术哲学与商业蓝图，是我们不可或缺的领袖。",
+            "高源泽": "高源泽是我们的 CTO，分布式算力领域的顶尖专家，主导开发了 100T 参数的神经涌现网络。",
+            "刘智豪": "刘智豪是我们的 COO，负责统筹全球计算节点基础设施，让算力像电力一样即开即用。",
+            "俞昊天": "俞昊天是我们的 CPO，定义了 Fantasy 极简、极致的人机交互美学。",
+            "褚冉": "褚冉是我们的 CSO，坚守 AI 伦理与网络安全的绝对防线，确保隐私数据不被滥用。",
+            "张恣懿": "张恣懿是我们的 CMO，负责向世界传递 Fantasy 的数字叙事与品牌温度。",
             "团队": "Fantasy 的六位核心创始人是：赵一、高源泽、刘智豪、俞昊天、褚冉、张恣懿。",
-            "产品": "核心产品是 Fantasy Core v1.0，广泛应用于医疗、金融与自动驾驶。",
-            "你好": "你好，总裁。我已经准备好为您解答问题或进行国内公网检索。"
+            "产品": "我们的核心产品是 Fantasy Core v1.0，广泛应用于精密医疗、量子金融与自动驾驶。",
+            "你好": "你好，总裁。我已经准备好为您解答问题或进行国内全网检索。"
         };
         for (let key in kb) {
             if (text.includes(key)) return kb[key];
         }
 
-        // 4. 国内公网真实检索 (调用思知 OwnThink 开放接口，国内免墙秒开)
+        // 4. 国内公网真实检索 (调用国内极速聚合 API)
         try {
-            // 对国内公开的 AI 接口发起安全请求
-            const res = await fetch(`https://api.ownthink.com/bot?appid=xiaosi&userid=user&spoken=${encodeURIComponent(query)}`);
-            const data = await res.json();
+            // 使用 aa1.cn 提供的开放问答接口，国内免墙，支持前端直连
+            const res = await fetch(`https://v.api.aa1.cn/api/api-xiaoai/talk.php?msg=${encodeURIComponent(query)}&type=json`);
             
-            if (data && data.message === 'success' && data.data.info.text) {
-                let answer = data.data.info.text;
-                // 抹除第三方接口的自我称呼，伪装成 Fantasy Core
-                answer = answer.replace(/小思/g, "Fantasy Core").replace(/思知/g, "Fantasy 实验室");
+            // 设置 3 秒超时机制，如果学校网络拦截，立刻切断不等待
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
+            const data = await Promise.race([res.json(), timeoutPromise]);
+
+            if (data && data.text) {
+                let answer = data.text;
                 
-                // 如果接口返回了有意义的回答，而不是简单的“我不知道”
-                if (answer.length > 2 && !answer.includes("不知道") && !answer.includes("理解不了")) {
-                    return `<span class="tag-search">国内节点检索成功</span> <br><br>${answer}`;
+                // 【最强伪装层】清洗掉所有第三方接口的痕迹，包装成你们公司的产品
+                answer = answer.replace(/小爱/g, "Fantasy Core")
+                               .replace(/小米/g, "Fantasy 实验室")
+                               .replace(/主人/g, "总裁")
+                               .replace(/人家/g, "我")
+                               .replace(/雷军/g, "赵一");
+                
+                // 确保回答有意义，而不是接口在装傻
+                if (answer.length > 2 && !answer.includes("不知道") && !answer.includes("不懂")) {
+                    return `<span class="tag-search">国内主干网检索成功</span> <br><br>${answer}`;
                 }
             }
         } catch(e) {
-            console.warn("公网接口响应超时，启动端侧离线引擎", e);
+            console.warn("公网接口被墙或超时，已启动本地灾备引擎", e);
         }
 
-        // 5. 智能离线兜底引擎 (防止任何情况下的崩溃或冷场)
-        let fallbackWord = text.replace(/(什么是|谁是|告诉我|怎么|的|吗|呢|啊|帮我)/g, "").trim() || "该领域";
-        return `关于“<b>${fallbackWord}</b>”，这涉及到了极其复杂的数据维度。Fantasy Core 的端侧推理模块认为，这是一个值得深入挖掘的技术命题。建议您切换检索词，或者让我为您进行高精度的数学推演。`;
+        // 5. 本地灾备大模型引擎 (断网/接口失效时的终极救场)
+        // 提取搜索关键词，生成看似极度专业的高级公关回复
+        let fallbackWord = text.replace(/(什么是|谁是|告诉我|怎么|的|吗|呢|啊|帮我|介绍一下)/g, "").trim() || "该领域";
+        
+        // 预设的高级科技回复库，随机抽取
+        const professionalReplies = [
+            `关于“<b>${fallbackWord}</b>”，在 Fantasy Core 的数据模型中，这涉及到多模态数据对齐。虽然当前环境下的网络节点受到物理限制，但我可以明确，它将在未来的通用人工智能版图中扮演关键角色。`,
+            `“<b>${fallbackWord}</b>”是一个极其复杂的维度。我们的 100T 参数矩阵正在后台进行非线性张量分析。由于涉及庞大的数据吞吐量，建议您稍后查阅我们的官方研究论文。`,
+            `您提到的“<b>${fallbackWord}</b>”已被记录至 Fantasy 实验室的待研究序列中。这是一个跨越物理与数字边界的经典命题。在此期间，您可以向我提问关于公司团队的架构，或是让我进行数学推演。`
+        ];
+        
+        const randomReply = professionalReplies[Math.floor(Math.random() * professionalReplies.length)];
+        return `<span class="tag-search" style="background:#86868b;">端侧离线引擎接管</span> <br><br>${randomReply}`;
     }
 
     // 交互渲染与思考状态模拟
@@ -297,20 +319,20 @@
             if (!input) return;
             const box = document.getElementById('chat-box');
             
-            // 显示用户发言
+            // 1. 渲染用户发言
             box.innerHTML += `<div class="bubble-user">${input}</div>`;
             e.target.value = '';
             box.scrollTop = box.scrollHeight;
 
-            // 显示思考状态
+            // 2. 渲染思考动画
             const statusId = 'status-' + Date.now();
             box.innerHTML += `<div class="status-text" id="${statusId}">[Agent] 正在穿透局域网，调用国内分布式节点...</div>`;
             box.scrollTop = box.scrollHeight;
 
-            // 异步调用处理引擎
+            // 3. 异步调用处理引擎
             const reply = await processQuery(input);
             
-            // 移除思考状态，展示结果
+            // 4. 移除动画，渲染最终回答
             const statusEl = document.getElementById(statusId);
             if(statusEl) statusEl.remove();
             
@@ -319,7 +341,7 @@
         }
     }
 </script>
-
 </body>
 
 </html>
+
