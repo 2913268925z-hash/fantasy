@@ -238,60 +238,56 @@
         win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
     }
 
-    // ==================== 核心引擎：本地计算 + 真实维基百科联网 API ====================
+    // ==================== 核心引擎：国内网络直连优化版 ====================
     async function processQuery(query) {
         const text = query.toLowerCase();
 
-        // 1. 本地安全数学计算器
+        // 1. 本地安全数学计算器 (无需联网)
         const mathMatch = query.match(/^[\d\+\-\*\/\(\)\.\s]+$/);
         if (mathMatch && query.trim().length > 1) {
-            try { return "本地计算完成，结果是：<b>" + eval(query) + "</b>"; } catch(e) {}
+            try { return "本地算力推演完成，结果是：<b>" + eval(query) + "</b>"; } catch(e) {}
         }
 
-        // 2. 实时系统时钟
+        // 2. 实时系统时钟 (无需联网)
         if (text.includes("时间") || text.includes("几点")) {
             return "系统时间同步：" + new Date().toLocaleTimeString();
         }
 
-        // 3. 专属私有知识库
+        // 3. 专属私有知识库 (最优先响应)
         const kb = {
             "赵一": "赵一先生是 Fantasy 的创始人兼 CEO，他主导了公司的技术哲学与商业走向。",
             "高源泽": "高源泽是我们的 CTO，他开发了 100T 参数的神经涌现网络。",
             "团队": "Fantasy 的六位核心创始人是：赵一、高源泽、刘智豪、俞昊天、褚冉、张恣懿。",
             "产品": "核心产品是 Fantasy Core v1.0，广泛应用于医疗、金融与自动驾驶。",
-            "你好": "你好，未来创造者。我已经准备好为您解答问题或进行全网检索。"
+            "你好": "你好，总裁。我已经准备好为您解答问题或进行国内公网检索。"
         };
         for (let key in kb) {
             if (text.includes(key)) return kb[key];
         }
 
-        // 4. 真实联网搜索 (调用维基百科无需鉴权的 Open API)
+        // 4. 国内公网真实检索 (调用思知 OwnThink 开放接口，国内免墙秒开)
         try {
-            // 提取搜索关键词 (去掉常见语气词)
-            let searchKeyword = text.replace(/(什么是|谁是|告诉我|介绍一下|的|吗|呢)/g, "").trim();
-            if (searchKeyword.length > 0) {
-                // 先通过 Search API 获取最精准的条目 Title
-                const searchRes = await fetch(`https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchKeyword)}&utf8=&format=json&origin=*`);
-                const searchData = await searchRes.json();
+            // 对国内公开的 AI 接口发起安全请求
+            const res = await fetch(`https://api.ownthink.com/bot?appid=xiaosi&userid=user&spoken=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            
+            if (data && data.message === 'success' && data.data.info.text) {
+                let answer = data.data.info.text;
+                // 抹除第三方接口的自我称呼，伪装成 Fantasy Core
+                answer = answer.replace(/小思/g, "Fantasy Core").replace(/思知/g, "Fantasy 实验室");
                 
-                if(searchData.query.search.length > 0) {
-                    const title = searchData.query.search[0].title;
-                    // 再通过 Summary API 获取条目的纯文本摘要
-                    const summaryRes = await fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-                    const summaryData = await summaryRes.json();
-                    
-                    if (summaryData.extract) {
-                        return `<span class="tag-search">联网检索成功</span>关于 <b>${title}</b>：<br><br>${summaryData.extract}`;
-                    }
+                // 如果接口返回了有意义的回答，而不是简单的“我不知道”
+                if (answer.length > 2 && !answer.includes("不知道") && !answer.includes("理解不了")) {
+                    return `<span class="tag-search">国内节点检索成功</span> <br><br>${answer}`;
                 }
             }
         } catch(e) {
-            console.error("联网失败", e);
+            console.warn("公网接口响应超时，启动端侧离线引擎", e);
         }
 
-        // 5. 智能兜底 (如果维基百科没搜到，且不是本地知识)
-        let fallbackWord = text.replace(/(什么是|怎么|的|吗|呢|啊|帮我)/g, "").trim() || "这个概念";
-        return `我在本地数据库和全网百科库中进行了检索，但关于“<b>${fallbackWord}</b>”尚未找到足够精准的技术定义。这可能是目前 AGI 认知网络中的盲区。您可以尝试查询其他百科词汇，或者让我进行数学运算。`;
+        // 5. 智能离线兜底引擎 (防止任何情况下的崩溃或冷场)
+        let fallbackWord = text.replace(/(什么是|谁是|告诉我|怎么|的|吗|呢|啊|帮我)/g, "").trim() || "该领域";
+        return `关于“<b>${fallbackWord}</b>”，这涉及到了极其复杂的数据维度。Fantasy Core 的端侧推理模块认为，这是一个值得深入挖掘的技术命题。建议您切换检索词，或者让我为您进行高精度的数学推演。`;
     }
 
     // 交互渲染与思考状态模拟
@@ -308,14 +304,16 @@
 
             // 显示思考状态
             const statusId = 'status-' + Date.now();
-            box.innerHTML += `<div class="status-text" id="${statusId}">[Agent] 正在进行本地逻辑运算与全网数据检索...</div>`;
+            box.innerHTML += `<div class="status-text" id="${statusId}">[Agent] 正在穿透局域网，调用国内分布式节点...</div>`;
             box.scrollTop = box.scrollHeight;
 
             // 异步调用处理引擎
             const reply = await processQuery(input);
             
             // 移除思考状态，展示结果
-            document.getElementById(statusId).remove();
+            const statusEl = document.getElementById(statusId);
+            if(statusEl) statusEl.remove();
+            
             box.innerHTML += `<div class="bubble-ai">${reply}</div>`;
             box.scrollTop = box.scrollHeight;
         }
@@ -323,4 +321,5 @@
 </script>
 
 </body>
+
 </html>
