@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fantasy AI | 想象力即现实</title>
+    <style>
+        /* Apple 极简亮色主题 */
+        :root { --bg: #ffffff; --surface: #f5f5f7; --text: #1d1d1f; --gray: #86868b; --border: #d2d2d7; --accent: #000000; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif; overflow-x: hidden; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+        /* 全局按钮 */
+        .btn { display: inline-block; padding: 16px 32px; border: 1px solid var(--text); background: transparent; color: var(--text); font-size: 14px; font-weight: 600; border-radius: 40px; transition: 0.3s ease; cursor: pointer; text-decoration: none; }
+        .btn:hover { background: var(--text); color: var(--bg); }
+        .btn-fill { background: var(--text); color: var(--bg); }
+        .btn-fill:hover { background: transparent; color: var(--text); }
+
+        /* -------------------- 导航 -------------------- */
+        nav { position: fixed; top: 0; width: 100%; height: 56px; background: rgba(255,255,255,0.85); backdrop-filter: saturate(180%) blur(20px); z-index: 9000; border-bottom: 1px solid var(--border); display: flex; justify-content: center; }
+        .nav-inner { width: 100%; max-width: 1200px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .logo { font-size: 22px; font-weight: 800; cursor: pointer; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 35px; }
+        .nav-link { font-size: 13px; color: var(--text); cursor: pointer; opacity: 0.7; transition: 0.2s; font-weight: 500; }
+        .nav-link:hover { opacity: 1; }
+
+        /* -------------------- 7大路由页面 -------------------- */
+        .page-view { display: none; padding-top: 56px; min-height: 100vh; animation: fadeIn 0.6s ease; background: var(--bg); }
+        .page-view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* -------------------- 首页深度排版 -------------------- */
+        .hero { padding: 150px 5% 100px; text-align: center; }
+        .mega-title { font-size: clamp(4rem, 10vw, 8rem); font-weight: 800; letter-spacing: -3px; line-height: 1.05; margin-bottom: 20px; }
+        .sub-title { font-size: 1.8rem; color: var(--gray); max-width: 800px; margin: 0 auto 50px; font-weight: 500; }
+        
+        /* 动态滚动横幅 */
+        .ticker-wrap { width: 100%; overflow: hidden; background: #000; color: #fff; padding: 15px 0; margin-bottom: 80px; }
+        .ticker { display: inline-block; white-space: nowrap; animation: ticker 20s linear infinite; font-size: 14px; font-weight: 600; letter-spacing: 2px; }
+        @keyframes ticker { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+
+        /* 巨型数据宣告 */
+        .data-section { padding: 100px 10%; background: var(--surface); text-align: center; border-radius: 40px; max-width: 1200px; margin: 0 auto 80px; }
+        .data-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 60px; }
+        .data-item h2 { font-size: 4rem; font-weight: 800; color: var(--accent); margin-bottom: 10px; }
+        .data-item p { color: var(--gray); font-size: 1.2rem; font-weight: 500; }
+
+        /* 核心价值观网格 */
+        .bento-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; max-width: 1200px; margin: 0 auto 80px; padding: 0 5%; }
+        .bento-card { background: var(--surface); padding: 60px; border-radius: 30px; border: 1px solid var(--border); transition: 0.4s; cursor: pointer; }
+        .bento-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.06); background: #fff; }
+        .bento-card h3 { font-size: 2.5rem; margin-bottom: 15px; letter-spacing: -1px; }
+
+        /* CEO 寄语 */
+        .quote-section { padding: 120px 10%; text-align: center; max-width: 1000px; margin: 0 auto; }
+        .quote-text { font-size: 2.5rem; font-weight: 600; line-height: 1.4; margin-bottom: 30px; }
+        .quote-author { font-size: 1.2rem; color: var(--gray); font-weight: 500; }
+
+        /* -------------------- 其他页面通用样式 -------------------- */
+        .page-header { padding: 120px 10% 60px; text-align: center; background: var(--surface); border-bottom: 1px solid var(--border); }
+        .content-section { padding: 80px 10%; max-width: 1200px; margin: 0 auto; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+        .info-card { background: var(--surface); padding: 40px; border-radius: 24px; transition: 0.3s; cursor: pointer; border: 1px solid transparent; }
+        .info-card:hover { border-color: var(--text); background: #fff; }
+
+        footer { background: var(--surface); padding: 80px 10%; border-top: 1px solid var(--border); text-align: center; color: var(--gray); font-size: 12px; margin-top: 50px; }
+
+        /* -------------------- 真实联网 AI 终端 -------------------- */
+        #ai-btn { position: fixed; bottom: 40px; right: 40px; width: 64px; height: 64px; background: var(--text); color: var(--bg); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: 800; font-size: 18px; z-index: 10000; cursor: pointer; box-shadow: 0 15px 30px rgba(0,0,0,0.2); transition: 0.3s; }
+        #ai-btn:hover { transform: scale(1.05); }
+        #ai-window { position: fixed; bottom: 120px; right: 40px; width: 420px; height: 580px; background: var(--bg); border: 1px solid var(--border); border-radius: 24px; z-index: 10001; display: none; flex-direction: column; box-shadow: 0 30px 60px rgba(0,0,0,0.15); overflow: hidden; }
+        .ai-header { padding: 20px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; }
+        .ai-body { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; font-size: 14px; }
+        .ai-input-area { padding: 20px; border-top: 1px solid var(--border); background: var(--surface); display: flex; }
+        .ai-input-area input { flex: 1; border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; outline: none; background: var(--bg); font-size: 14px; }
+        
+        .bubble-user { align-self: flex-end; background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: 20px 20px 4px 20px; max-width: 85%; }
+        .bubble-ai { align-self: flex-start; background: #f0f0f2; color: var(--text); padding: 12px 18px; border-radius: 20px 20px 20px 4px; max-width: 85%; line-height: 1.6; }
+        .status-text { font-size: 12px; color: #007aff; align-self: flex-start; margin-bottom: -10px; margin-left: 10px; font-weight: 600; }
+        .tag-search { background: #007aff; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-right: 5px; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="nav-inner">
+        <div class="logo" onclick="switchPage('home')">Fantasy.</div>
+        <div class="nav-links">
+            <span class="nav-link" onclick="switchPage('home')">概览</span>
+            <span class="nav-link" onclick="switchPage('tech')">核心架构</span>
+            <span class="nav-link" onclick="switchPage('products')">生态应用</span>
+            <span class="nav-link" onclick="switchPage('api')">开发者</span>
+            <span class="nav-link" onclick="switchPage('research')">实验室</span>
+            <span class="nav-link" onclick="switchPage('ethics')">伦理协议</span>
+            <span class="nav-link" onclick="switchPage('team')">科学家集群</span>
+        </div>
+    </div>
+</nav>
+
+<div id="page-home" class="page-view active">
+    <div class="hero">
+        <h1 class="mega-title">绝对算力。<br>绝对优雅。</h1>
+        <p class="sub-title">Fantasy Core v1.0. 抛弃一切冗余的色彩，用最纯粹的黑白逻辑，构建通用人工智能的终极协议。</p>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <span class="btn btn-fill" onclick="switchPage('tech')">阅读架构白皮书</span>
+            <span class="btn" onclick="switchPage('api')">申请 API 终端</span>
+        </div>
+    </div>
+
+    <div class="ticker-wrap">
+        <div class="ticker">
+            POWERING THE FUTURE OF: PRECISION MEDICINE • AUTONOMOUS DRIVING • QUANTUM FINANCE • COGNITIVE ROBOTICS • NEURAL INTERFACES • PRECISION MEDICINE • AUTONOMOUS DRIVING • QUANTUM FINANCE
+        </div>
+    </div>
+
+    <div class="data-section">
+        <h2 style="font-size: 3rem; font-weight: 800; margin-bottom: 20px;">跨越维度的性能跃升。</h2>
+        <p style="color:var(--gray); font-size: 1.2rem; max-width: 600px; margin: 0 auto;">在 Fantasy 实验室的受控环境下，我们实现了惊人的算力转化率。</p>
+        <div class="data-grid">
+            <div class="data-item"><h2>100T</h2><p>神经元参数矩阵</p></div>
+            <div class="data-item"><h2>0.1ms</h2><p>端侧推理延迟</p></div>
+            <div class="data-item"><h2>100%</h2><p>本地化隐私隔绝</p></div>
+        </div>
+    </div>
+
+    <div class="bento-grid">
+        <div class="bento-card" onclick="switchPage('products')">
+            <h3>全领域渗透。</h3>
+            <p style="color:var(--gray); margin-bottom: 20px; font-size: 1.1rem;">不仅是文字助手，Fantasy 正在驱动全球金融风控、医疗手术机器人与 L5 级自动驾驶的决策中枢。</p>
+            <span style="font-weight: 600; text-decoration: underline;">查看生态应用</span>
+        </div>
+        <div class="bento-card" onclick="switchPage('ethics')">
+            <h3>隐私的绝对主权。</h3>
+            <p style="color:var(--gray); margin-bottom: 20px; font-size: 1.1rem;">我们将千亿算力无损压缩至端侧设备。您的每一行思索、每一段代码，永远不会上传至任何云端服务器。</p>
+            <span style="font-weight: 600; text-decoration: underline;">阅读伦理协议</span>
+        </div>
+        <div class="bento-card" style="grid-column: span 2;" onclick="switchPage('team')">
+            <h3>定义未来的人们。</h3>
+            <p style="color:var(--gray); margin-bottom: 20px; font-size: 1.1rem;">由赵一、高源泽、刘智豪等六位全球顶尖科学家创立，汇聚了算法、基建、伦理与设计的最高智慧。</p>
+            <span style="font-weight: 600; text-decoration: underline;">认识科学家集群</span>
+        </div>
+    </div>
+
+    <div class="quote-section">
+        <p class="quote-text">“真正的科技，是让复杂的技术消失在优雅的体验之中。我们创造的不是一个工具，而是人类意志的数字延伸。”</p>
+        <p class="quote-author">— 赵一，Fantasy 创始人兼 CEO</p>
+    </div>
+</div>
+
+<div id="page-tech" class="page-view">
+    <div class="page-header"><h1 class="page-title">算法的终点。</h1><p class="page-subtitle">Fantasy Core 采用了动态自修复架构 (DSR) 与超维向量空间技术。</p></div>
+    <div class="content-section grid-3">
+        <div class="info-card"><h3>动态自修复</h3><p style="color:var(--gray); margin-top:10px;">模型在推理中能识别逻辑冲突，彻底消除幻觉。</p></div>
+        <div class="info-card"><h3>4096维张量</h3><p style="color:var(--gray); margin-top:10px;">超越语义的直觉搜索，让 AI 理解文字背后的隐喻。</p></div>
+        <div class="info-card"><h3>跨模态视觉</h3><p style="color:var(--gray); margin-top:10px;">原生支持 4K 视频流实时推理与动作捕捉。</p></div>
+    </div>
+</div>
+
+<div id="page-products" class="page-view">
+    <div class="page-header"><h1 class="page-title">重构千行百业。</h1><p class="page-subtitle">全球 500 强企业的底层数字逻辑引擎。</p></div>
+    <div class="content-section">
+        <div style="border-bottom: 1px solid var(--border); padding: 40px 0;"><h2>智能金融 (Q-Finance)</h2><p style="color:var(--gray); margin-top:10px;">通过量子级节点，实时预测跨国市场的毫秒级波动。</p></div>
+        <div style="border-bottom: 1px solid var(--border); padding: 40px 0;"><h2>精密医疗 (Med-Core)</h2><p style="color:var(--gray); margin-top:10px;">辅助外科机器人进行基因测序与微米级病灶切除。</p></div>
+        <div style="padding: 40px 0;"><h2>自动驾驶 (Auto-Sense)</h2><p style="color:var(--gray); margin-top:10px;">为无人车提供具备人类防御性直觉的决策网络。</p></div>
+    </div>
+</div>
+
+<div id="page-api" class="page-view">
+    <div class="page-header"><h1 class="page-title">接入帝国算力。</h1><p class="page-subtitle">通过极简的 RESTful API，唤醒千亿参数的智能涌现。</p></div>
+    <div class="content-section" style="text-align: center;">
+        <div style="background: #000; color: #fff; padding: 40px; border-radius: 20px; font-family: monospace; text-align: left; margin-bottom: 40px; font-size: 14px;">
+            > POST /v1/fantasy/completions<br>
+            > Content-Type: application/json<br>
+            > { "model": "fantasy-v1.0", "prompt": "Ignite the future" }
+        </div>
+        <span class="btn btn-fill" onclick="alert('开发者控制台建设中...')">获取 API 密钥</span>
+    </div>
+</div>
+
+<div id="page-research" class="page-view">
+    <div class="page-header"><h1 class="page-title">探索 2030。</h1><p class="page-subtitle">这里记录了我们在 AGI 领域的最新突破与激进实验。</p></div>
+    <div class="content-section grid-2">
+        <div class="info-card" style="background: var(--bg); border: 1px solid var(--border);"><h3>项目：Brain-Sync</h3><p style="color:var(--gray); margin-top:10px;">探索非侵入式脑机接口，实现意识级别的指令下达。</p></div>
+        <div class="info-card" style="background: var(--bg); border: 1px solid var(--border);"><h3>开源：Mini-Fantasy</h3><p style="color:var(--gray); margin-top:10px;">向学术界开放 7B 参数的研究模型，推动人类共同进步。</p></div>
+    </div>
+</div>
+
+<div id="page-ethics" class="page-view">
+    <div class="page-header"><h1 class="page-title">防线与底线。</h1><p class="page-subtitle">力量必须被枷锁控制。Fantasy 将安全置于一切之上。</p></div>
+    <div class="content-section" style="max-width: 800px; font-size: 1.2rem;">
+        <p style="margin-bottom: 30px;"><strong>第一法则：意志归属。</strong> Fantasy 绝不生成、也无法产生具备自我意识的独立代码。它永远是人类的镜像工具。</p>
+        <p style="margin-bottom: 30px;"><strong>加密协议 v3：</strong> 系统强制采用端侧 256 位量子随机数加密。连 Fantasy 的工程师也无法窥探您的本地数据流。</p>
+    </div>
+</div>
+
+<div id="page-team" class="page-view">
+    <div class="page-header"><h1 class="page-title">定义未来的六人。</h1><p class="page-subtitle">来自全球顶尖机构的科学家集群。</p></div>
+    <div class="content-section grid-3">
+        <div class="info-card"><h3>赵一</h3><p style="color:var(--gray);">CEO。主导商业蓝图与底层哲学架构。</p></div>
+        <div class="info-card"><h3>高源泽</h3><p style="color:var(--gray);">CTO。分布式算力与神经网络天才。</p></div>
+        <div class="info-card"><h3>刘智豪</h3><p style="color:var(--gray);">COO。统筹全球计算节点基础设施。</p></div>
+        <div class="info-card"><h3>俞昊天</h3><p style="color:var(--gray);">CPO。定义了极简、极致的人机交互美学。</p></div>
+        <div class="info-card"><h3>褚冉</h3><p style="color:var(--gray);">CSO。坚守 AI 伦理与网络安全的绝对防线。</p></div>
+        <div class="info-card"><h3>张恣懿</h3><p style="color:var(--gray);">CMO。向世界传递 Fantasy 的数字叙事。</p></div>
+    </div>
+</div>
+
+<footer>
+    <p>作业展示版本。包含 7 大完整路由页面。© 2026 Fantasy Group. 保留所有权利。</p>
+</footer>
+
+<div id="ai-btn" onclick="toggleAI()">AI</div>
+<div id="ai-window">
+    <div class="ai-header">
+        <span>Fantasy Logic Engine</span>
+        <span onclick="toggleAI()" style="cursor:pointer; color: var(--gray);">关闭</span>
+    </div>
+    <div class="ai-body" id="chat-box">
+        <div class="bubble-ai">你好。我搭载了本地逻辑引擎与 <b>OpenSearch 联网接口</b>。你可以问我关于公司的问题、进行数学计算，或者<b>询问真实世界的百科知识（如：什么是黑洞、苹果公司）</b>。</div>
+    </div>
+    <div class="ai-input-area">
+        <input type="text" id="ai-in" placeholder="在此输入问题或运算式..." onkeydown="handleAI(event)">
+    </div>
+</div>
+
+<script>
+    // 虚拟路由：控制 7 大网页无缝切换
+    function switchPage(pageId) {
+        document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-' + pageId).classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    // AI 窗口控制
+    function toggleAI() {
+        const win = document.getElementById('ai-window');
+        win.style.display = (win.style.display === 'flex') ? 'none' : 'flex';
+    }
+
+    // ==================== 核心引擎：本地计算 + 真实维基百科联网 API ====================
+    async function processQuery(query) {
+        const text = query.toLowerCase();
+
+        // 1. 本地安全数学计算器
+        const mathMatch = query.match(/^[\d\+\-\*\/\(\)\.\s]+$/);
+        if (mathMatch && query.trim().length > 1) {
+            try { return "本地计算完成，结果是：<b>" + eval(query) + "</b>"; } catch(e) {}
+        }
+
+        // 2. 实时系统时钟
+        if (text.includes("时间") || text.includes("几点")) {
+            return "系统时间同步：" + new Date().toLocaleTimeString();
+        }
+
+        // 3. 专属私有知识库
+        const kb = {
+            "赵一": "赵一先生是 Fantasy 的创始人兼 CEO，他主导了公司的技术哲学与商业走向。",
+            "高源泽": "高源泽是我们的 CTO，他开发了 100T 参数的神经涌现网络。",
+            "团队": "Fantasy 的六位核心创始人是：赵一、高源泽、刘智豪、俞昊天、褚冉、张恣懿。",
+            "产品": "核心产品是 Fantasy Core v1.0，广泛应用于医疗、金融与自动驾驶。",
+            "你好": "你好，未来创造者。我已经准备好为您解答问题或进行全网检索。"
+        };
+        for (let key in kb) {
+            if (text.includes(key)) return kb[key];
+        }
+
+        // 4. 真实联网搜索 (调用维基百科无需鉴权的 Open API)
+        try {
+            // 提取搜索关键词 (去掉常见语气词)
+            let searchKeyword = text.replace(/(什么是|谁是|告诉我|介绍一下|的|吗|呢)/g, "").trim();
+            if (searchKeyword.length > 0) {
+                // 先通过 Search API 获取最精准的条目 Title
+                const searchRes = await fetch(`https://zh.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchKeyword)}&utf8=&format=json&origin=*`);
+                const searchData = await searchRes.json();
+                
+                if(searchData.query.search.length > 0) {
+                    const title = searchData.query.search[0].title;
+                    // 再通过 Summary API 获取条目的纯文本摘要
+                    const summaryRes = await fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
+                    const summaryData = await summaryRes.json();
+                    
+                    if (summaryData.extract) {
+                        return `<span class="tag-search">联网检索成功</span>关于 <b>${title}</b>：<br><br>${summaryData.extract}`;
+                    }
+                }
+            }
+        } catch(e) {
+            console.error("联网失败", e);
+        }
+
+        // 5. 智能兜底 (如果维基百科没搜到，且不是本地知识)
+        let fallbackWord = text.replace(/(什么是|怎么|的|吗|呢|啊|帮我)/g, "").trim() || "这个概念";
+        return `我在本地数据库和全网百科库中进行了检索，但关于“<b>${fallbackWord}</b>”尚未找到足够精准的技术定义。这可能是目前 AGI 认知网络中的盲区。您可以尝试查询其他百科词汇，或者让我进行数学运算。`;
+    }
+
+    // 交互渲染与思考状态模拟
+    async function handleAI(e) {
+        if (e.key === 'Enter') {
+            const input = e.target.value.trim();
+            if (!input) return;
+            const box = document.getElementById('chat-box');
+            
+            // 显示用户发言
+            box.innerHTML += `<div class="bubble-user">${input}</div>`;
+            e.target.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            // 显示思考状态
+            const statusId = 'status-' + Date.now();
+            box.innerHTML += `<div class="status-text" id="${statusId}">[Agent] 正在进行本地逻辑运算与全网数据检索...</div>`;
+            box.scrollTop = box.scrollHeight;
+
+            // 异步调用处理引擎
+            const reply = await processQuery(input);
+            
+            // 移除思考状态，展示结果
+            document.getElementById(statusId).remove();
+            box.innerHTML += `<div class="bubble-ai">${reply}</div>`;
+            box.scrollTop = box.scrollHeight;
+        }
+    }
+</script>
+
+</body>
+</html>
