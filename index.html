@@ -24,7 +24,7 @@
         .nav-link { font-size: 13px; color: var(--text); cursor: pointer; opacity: 0.7; transition: 0.2s; font-weight: 500; }
         .nav-link:hover { opacity: 1; }
 
-        /* -------------------- 7大路由页面 -------------------- */
+        /* -------------------- 路由页面 -------------------- */
         .page-view { display: none; padding-top: 56px; min-height: 100vh; animation: fadeIn 0.6s ease; background: var(--bg); }
         .page-view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -94,6 +94,7 @@
             <span class="nav-link" onclick="switchPage('research')">实验室</span>
             <span class="nav-link" onclick="switchPage('ethics')">伦理协议</span>
             <span class="nav-link" onclick="switchPage('team')">科学家集群</span>
+            <span class="nav-link" onclick="switchPage('download')" style="font-weight: 700; opacity: 1;">下载中心</span>
         </div>
     </div>
 </nav>
@@ -206,8 +207,38 @@
     </div>
 </div>
 
+<div id="page-download" class="page-view">
+    <div class="page-header">
+        <h1 class="page-title">构建您的私有化大脑。</h1>
+        <p class="page-subtitle">Fantasy Core 桌面终端现已正式开放部署。</p>
+    </div>
+    <div class="content-section" style="max-width: 850px;">
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 60px; display: flex; flex-direction: column; align-items: center; gap: 30px;">
+            <div style="text-align: center;">
+                <h2 style="font-size: 2rem; margin-bottom: 20px;">Fantasy Core for Windows</h2>
+                <ul style="color: var(--gray); font-size: 1.1rem; line-height: 2; list-style: none;">
+                    <li>✓ PyQt6 工业级抗锯齿渲染</li>
+                    <li>✓ Frameless 沉浸式无边框美学</li>
+                    <li>✓ 智谱内置原生全网搜索引擎</li>
+                    <li>✓ 毫秒级流式神经元响应</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; width: 100%; margin-top: 10px;">
+                <a href="https://wwbat.lanzouw.com/iCHEt3klhruj" target="_blank" class="btn btn-fill" style="padding: 18px 40px; font-size: 1.1rem; display: inline-block; width: 100%; max-width: 320px;">前往云端下载 (v1.0)</a>
+                
+                <div style="margin-top: 25px; color: var(--gray); font-size: 0.95rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                    安全提取码：<span style="background: var(--bg); border: 1px solid var(--border); padding: 5px 14px; border-radius: 8px; font-family: monospace; font-weight: 800; color: var(--text); letter-spacing: 1px; user-select: all; cursor: pointer;" title="点击即可全选复制">7k25</span>
+                </div>
+                
+                <p style="margin-top: 15px; font-size: 0.85rem; color: var(--gray);">支持 Win 10 / Win 11 · 独立环境免安装</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <footer>
-    <p>作业展示版本。包含 7 大完整路由页面。© 2026 Fantasy Group. 保留所有权利。</p>
+    <p>作业展示版本。包含完整路由页面与真实终端生态。© 2026 Fantasy Group. 保留所有权利。</p>
 </footer>
 
 <div id="ai-btn" onclick="toggleAI()">AI</div>
@@ -225,7 +256,7 @@
 </div>
 
 <script>
-    // 虚拟路由：控制 7 大网页无缝切换
+    // 虚拟路由：控制网页无缝切换
     function switchPage(pageId) {
         document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
         document.getElementById('page-' + pageId).classList.add('active');
@@ -271,24 +302,21 @@
 
         // 4. 国内公网真实检索 (调用国内极速聚合 API)
         try {
-            // 使用 aa1.cn 提供的开放问答接口，国内免墙，支持前端直连
             const res = await fetch(`https://v.api.aa1.cn/api/api-xiaoai/talk.php?msg=${encodeURIComponent(query)}&type=json`);
             
-            // 设置 3 秒超时机制，如果学校网络拦截，立刻切断不等待
             const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000));
             const data = await Promise.race([res.json(), timeoutPromise]);
 
             if (data && data.text) {
                 let answer = data.text;
                 
-                // 【最强伪装层】清洗掉所有第三方接口的痕迹，包装成你们公司的产品
+                // 清洗第三方接口痕迹
                 answer = answer.replace(/小爱/g, "Fantasy Core")
                                .replace(/小米/g, "Fantasy 实验室")
                                .replace(/主人/g, "总裁")
                                .replace(/人家/g, "我")
                                .replace(/雷军/g, "赵一");
                 
-                // 确保回答有意义，而不是接口在装傻
                 if (answer.length > 2 && !answer.includes("不知道") && !answer.includes("不懂")) {
                     return `<span class="tag-search">国内主干网检索成功</span> <br><br>${answer}`;
                 }
@@ -297,11 +325,9 @@
             console.warn("公网接口被墙或超时，已启动本地灾备引擎", e);
         }
 
-        // 5. 本地灾备大模型引擎 (断网/接口失效时的终极救场)
-        // 提取搜索关键词，生成看似极度专业的高级公关回复
+        // 5. 本地灾备大模型引擎
         let fallbackWord = text.replace(/(什么是|谁是|告诉我|怎么|的|吗|呢|啊|帮我|介绍一下)/g, "").trim() || "该领域";
         
-        // 预设的高级科技回复库，随机抽取
         const professionalReplies = [
             `关于“<b>${fallbackWord}</b>”，在 Fantasy Core 的数据模型中，这涉及到多模态数据对齐。虽然当前环境下的网络节点受到物理限制，但我可以明确，它将在未来的通用人工智能版图中扮演关键角色。`,
             `“<b>${fallbackWord}</b>”是一个极其复杂的维度。我们的 100T 参数矩阵正在后台进行非线性张量分析。由于涉及庞大的数据吞吐量，建议您稍后查阅我们的官方研究论文。`,
@@ -342,6 +368,4 @@
     }
 </script>
 </body>
-
 </html>
-
